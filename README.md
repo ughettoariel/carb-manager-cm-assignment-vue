@@ -60,10 +60,10 @@ We suggest you don't spend more than 2h on this challenge.
 
 ## Submission
 
-- **Clone** the repo (don't fork) to get started. 
-- Create a new branch
-- Commit all the changes to the new branch
-- Create a PR to `main` when you're done
+- **Clone** the repo (don't fork) to get started.
+- Create a new branch.
+- Commit all the changes to the new branch.
+- When you're done create a PR to the `main` branch **in your repo**.
 
 ## Customize configuration
 
