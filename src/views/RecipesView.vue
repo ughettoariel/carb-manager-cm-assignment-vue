@@ -106,32 +106,29 @@ export default {
   methods: {
     getEnergy(recipeUnit, value) {
       let label;
-      let val;
 
       if (recipeUnit !== this.user.units.energy) {
         if (recipeUnit === 'kilojoule') {
           label = 'kCal'
-          val = value / 4.184;
+          value = value / 4.184;
         }
         else {
           label = 'kJ';
-          val = value * 4.184;
+          value = value * 4.184;
         }
       }
       else {
         if (recipeUnit === 'kilojoule') {
           label = 'kJ'
-          val = value;
         }
         else {
           label = 'kCal'
-          val = value;
         }
       }
 
       return {
         label,
-        value: val,
+        value,
       };
     },
 
