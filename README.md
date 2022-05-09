@@ -2,7 +2,7 @@
 
 Welcome to Carb Manager Dev Vue.js Assignment. 
 There is also a React version of this assignment.  Both assignments are equally scored, feel free to choose one or the other, whichever you feel more comfortable with.
-- [cm-assignment-react](TODO://add.cm-assignment-react.link)
+- [cm-assignment-react](https://github.com/carb-manager/cm-assignment-react)
 
 ## Project structure
 
