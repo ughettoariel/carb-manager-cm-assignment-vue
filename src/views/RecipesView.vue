@@ -56,7 +56,6 @@
         </div>
       </div>
     </template>
-    <!-- FIXME: Why the error message flashes in initial load? -->
     <div v-if="!recipesList.length">Unable to load recipes</div>
   </div>
 </template>
