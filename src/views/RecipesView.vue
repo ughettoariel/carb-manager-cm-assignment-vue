@@ -1,14 +1,12 @@
 <template>
   <div class="recipes">
     <template v-if="!error">
-      <!-- TODO: Create a generic <SearchInput> component -->
       <input
         placeholder="Search foods and servings&hellip;"
         class="search"
         type="text"
         @input="filterRecipes($event.target.value)"
       />
-      <!-- TODO: Add loading indicator -->
       <div v-for="(recipe, index) in recipesList" :key="index" class="list">
         <div class="recipe-item" @click="goToSingleRecipe(recipe.id)">
           <div class="recipe-name">
@@ -140,7 +138,6 @@ export default {
     filterRecipes(value) {
       this.isFiltered = value !== '';
 
-      // TODO: Make search results case-insensitive
       this.filteredRecipes = this.recipes.filter(({ name }) => name.includes(value))
     },
 
