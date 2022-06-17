@@ -15,11 +15,7 @@
           :key="recipe.id"
           class="recipes-list"
         >
-          <RecipeCard
-            :user="user"
-            :recipe="recipe"
-            :show-nutrient-name="index == 0"
-          />
+          <RecipeCard :recipe="recipe" :show-nutrient-name="index == 0" />
         </div>
       </div>
       <p v-else-if="!loading">No matching recipes</p>
@@ -30,7 +26,6 @@
 <script>
 import { mapState, mapActions } from "pinia";
 import { useRecipesStore } from "@/stores/recipes";
-import { useUserStore } from "@/stores/user";
 import RecipeCard from "@/components/RecipeCard.vue";
 
 export default {
@@ -47,8 +42,9 @@ export default {
   async created() {
     try {
       this.loading = true;
-      await Promise.all([this.fetchUser(), this.fetchRecipes()]);
-      this.recipesList = this.getFilteredRecipes();
+
+      if (!this.recipes.length) await this.fetchRecipes();
+      this.recipesList = this.recipes;
     } catch (e) {
       this.error = true;
     }
@@ -56,18 +52,14 @@ export default {
   },
 
   computed: {
-    ...mapState(useUserStore, {
-      user: "user",
-      userError: "error",
-    }),
     ...mapState(useRecipesStore, {
+      recipes: "recipes",
       getFilteredRecipes: "getFilteredRecipes",
       recipesError: "error",
     }),
   },
 
   methods: {
-    ...mapActions(useUserStore, ["fetchUser"]),
     ...mapActions(useRecipesStore, ["fetchRecipes"]),
 
     hasError() {

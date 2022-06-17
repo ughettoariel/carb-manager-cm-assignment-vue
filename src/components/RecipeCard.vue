@@ -49,7 +49,9 @@ export default {
     Tags,
   },
 
-  props: ["recipe", "showNutrientName", "user"],
+  props: ["recipe", "showNutrientName"],
+
+  computed: mapState(useUserStore, ["user"]),
 
   methods: {
     haldleCardClick(id) {
