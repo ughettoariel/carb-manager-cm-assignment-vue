@@ -63,7 +63,7 @@ export default {
     ...mapActions(useRecipesStore, ["fetchRecipes"]),
 
     hasError() {
-      return this.error || this.userError || this.recipesError;
+      return this.error || this.recipesError;
     },
 
     handleFilterRecipes(value) {
