@@ -65,7 +65,8 @@ export default {
 
     getEnergy(recipeUnit, value) {
       let energy = { label: "", value };
-      if (recipeUnit !== this.user?.units?.energy) {
+
+      if (recipeUnit !== this.user.units.energy) {
         if (recipeUnit === "kilojoule") {
           energy.label = "kCal";
           energy.value = value / 4.184;
@@ -74,7 +75,11 @@ export default {
           energy.value = value * 4.184;
         }
       } else {
-        energy.label = energy === "kilojoule" ? "kJ" : "kCal";
+        if (recipeUnit === "kilojoule") {
+          energy.label = "kJ";
+        } else {
+          energy.label = "kCal";
+        }
       }
 
       return energy;

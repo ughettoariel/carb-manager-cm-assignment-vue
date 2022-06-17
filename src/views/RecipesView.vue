@@ -1,13 +1,13 @@
 <template>
   <div class="recipes">
-    <div v-if="isLoading">loading ...</div>
-    <div v-else-if="error">Unable to load recipes</div>
+    <div v-if="loading">loading ...</div>
+    <div v-else-if="hasError()">Unable to load recipes</div>
     <template v-else>
       <input
         placeholder="Search foods and servings&hellip;"
         class="search"
         type="text"
-        @input="filterRecipes($event.target.value)"
+        @input="handleFilterRecipes($event.target.value)"
       />
       <div v-if="recipesList.length">
         <div
@@ -22,15 +22,16 @@
           />
         </div>
       </div>
-      <p v-else-if="!isLoading">No matching recipes</p>
+      <p v-else-if="!loading">No matching recipes</p>
     </template>
   </div>
 </template>
 
 <script>
+import { mapState, mapActions } from "pinia";
+import { useRecipesStore } from "@/stores/recipes";
+import { useUserStore } from "@/stores/user";
 import RecipeCard from "@/components/RecipeCard.vue";
-import getRecipes from "@/api/getRecipes";
-import getUser from "@/api/getUser";
 
 export default {
   components: {
@@ -38,45 +39,43 @@ export default {
   },
 
   data: () => ({
-    isLoading: false,
-    isFiltered: false,
-    recipes: [],
-    filteredRecipes: [],
-    user: {},
+    recipesList: [],
+    loading: false,
     error: false,
   }),
 
   async created() {
     try {
-      this.isLoading = true;
-      this.recipes = await getRecipes();
-      this.user = await getUser();
+      this.loading = true;
+      await Promise.all([this.fetchUser(), this.fetchRecipes()]);
+      this.recipesList = this.getFilteredRecipes();
     } catch (e) {
       this.error = true;
     }
-    this.isLoading = false;
+    this.loading = false;
   },
 
   computed: {
-    recipesList() {
-      return this.isFiltered ? this.filteredRecipes : this.recipes;
-    },
+    ...mapState(useUserStore, {
+      user: "user",
+      userError: "error",
+    }),
+    ...mapState(useRecipesStore, {
+      getFilteredRecipes: "getFilteredRecipes",
+      recipesError: "error",
+    }),
   },
 
   methods: {
-    filterRecipes(value) {
-      this.isFiltered = value.trim() !== "";
+    ...mapActions(useUserStore, ["fetchUser"]),
+    ...mapActions(useRecipesStore, ["fetchRecipes"]),
 
-      this.filteredRecipes = this.recipes.filter(({ name }) =>
-        name.toLowerCase().includes(value.toLowerCase())
-      );
+    hasError() {
+      return this.error || this.userError || this.recipesError;
     },
 
-    goToSingleRecipe(id) {
-      this.$router.push({
-        name: "recipe",
-        params: { id },
-      });
+    handleFilterRecipes(value) {
+      this.recipesList = this.getFilteredRecipes(value);
     },
   },
 };
