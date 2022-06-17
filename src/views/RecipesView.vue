@@ -1,258 +1,82 @@
 <template>
   <div class="recipes">
-    <template v-if="!error">
-      <input
+    <div v-if="loading">loading ...</div>
+    <div v-else-if="hasError()">Unable to load recipes</div>
+    <template v-else>
+      <SearchInput
         placeholder="Search foods and servings&hellip;"
-        class="search"
-        type="text"
-        @input="filterRecipes($event.target.value)"
+        :on-search="handleFilterRecipes"
+        case-sensitive
       />
-      <div v-for="(recipe, index) in recipesList" :key="index" class="list">
-        <div class="recipe-item" @click="goToSingleRecipe(recipe.id)">
-          <div class="recipe-name">
-            {{ recipe.name }}
-          </div>
-          <img class="recipeImage" :src="recipe.image" />
-          <div class="nutrients">
-            <template
-              v-for="({ value, unit }, nutrientName) in recipe.nutrients"
-              :key="value"
-            >
-              <NutrientItem
-                :name="index === 0 ? 'Carbs' : null"
-                :value="value + 'g'"
-                v-if="nutrientName === 'carbs'"
-                class="carbs"
-              />
-              <NutrientItem
-                :name="index === 0 ? 'Protein' : null"
-                :value="value + 'g'"
-                v-if="nutrientName === 'proteins'"
-                class="protein"
-              />
-              <NutrientItem
-                :name="index === 0 ? 'Fat' : null"
-                :value="value + 'g'"
-                v-if="nutrientName === 'fats'"
-                class="fat"
-              />
-              <NutrientItem
-                v-if="nutrientName === 'energy'"
-                :name="index === 0 ? getEnergy(unit, value).label : null"
-                :value="round(getEnergy(unit, value).value)"
-                class="energy"
-              />
-            </template>
-          </div>
-          <div class="tags">
-            <div class="tag premium" v-if="recipe.isPremium">
-              <img class="trophy" src="../assets/trophy.svg" />
-              Premium
-            </div>
-            <div class="tag" v-for="tag in recipe.tags" :key="tag">
-              {{ tag }}
-            </div>
-          </div>
+      <div v-if="recipesList.length">
+        <div
+          v-for="(recipe, index) in recipesList"
+          :key="recipe.id"
+          class="recipes-list"
+        >
+          <RecipeCard :recipe="recipe" :show-nutrient-name="index == 0" />
         </div>
       </div>
+      <p v-else-if="!loading">No matching recipes</p>
     </template>
-    <div v-if="!recipesList.length">Unable to load recipes</div>
   </div>
 </template>
 
-<script lang="js">
-import NutrientItem from '@/components/NutrientItem.vue'
-import getRecipes from '@/api/getRecipes'
-import getUser from '@/api/getUser'
+<script>
+import { mapState, mapActions } from "pinia";
+import { useRecipesStore } from "@/stores/recipes";
+import RecipeCard from "@/components/RecipeCard.vue";
+import SearchInput from "@/components/SearchInput.vue";
 
 export default {
   components: {
-    NutrientItem
+    RecipeCard,
+    SearchInput,
   },
 
   data: () => ({
-    isFiltered: false,
-    recipes: [],
-    filteredRecipes: [],
-    user: {},
+    recipesList: [],
+    loading: false,
     error: false,
   }),
 
-  async mounted () {
+  async created() {
     try {
-      const recipes = await getRecipes();
-      const user = await getUser();
-
-      this.recipes = recipes;
-      this.user = user;
-
-      if (!this.recipes.length) {
-        this.error = true;
-      }
+      this.loading = true;
+      if (!this.recipes.length) await this.fetchRecipes();
+      this.recipesList = this.recipes;
     } catch (e) {
-      console.error(e)
+      this.error = true;
     }
+    this.loading = false;
   },
 
   computed: {
-    recipesList() {
-      return this.isFiltered ? this.filteredRecipes : this.recipes;
-    },
+    ...mapState(useRecipesStore, {
+      recipes: "recipes",
+      getFilteredRecipes: "getFilteredRecipes",
+      recipesError: "error",
+    }),
   },
 
   methods: {
-    getEnergy(recipeUnit, value) {
-      let label;
+    ...mapActions(useRecipesStore, ["fetchRecipes"]),
 
-      if (recipeUnit !== this.user.units.energy) {
-        if (recipeUnit === 'kilojoule') {
-          label = 'kCal'
-          value = value / 4.184;
-        }
-        else {
-          label = 'kJ';
-          value = value * 4.184;
-        }
-      }
-      else {
-        if (recipeUnit === 'kilojoule') {
-          label = 'kJ'
-        }
-        else {
-          label = 'kCal'
-        }
-      }
-
-      return {
-        label,
-        value,
-      };
+    hasError() {
+      return this.error || this.recipesError;
     },
 
-    round(num, decimalPlaces = 2) {
-      const p = Math.pow(10, decimalPlaces);
-      return Math.round(num * p) / p;
+    handleFilterRecipes(value) {
+      this.recipesList = this.getFilteredRecipes(value);
     },
-
-    filterRecipes(value) {
-      this.isFiltered = value !== '';
-
-      this.filteredRecipes = this.recipes.filter(({ name }) => name.includes(value))
-    },
-
-    goToSingleRecipe(id) {
-      this.$router.push({
-        name: 'recipe',
-        params: { id }
-      })
-    }
-  }
-}
+  },
+};
 </script>
 
 <style lang="scss">
 .recipes {
-}
-
-.search {
-  border: 1px solid #ebebeb;
-  padding: 16px 12px;
-  border-radius: 30px;
-  display: block;
-  margin-bottom: 12px;
-  width: 100%;
-  transition: all 0.15s ease-out;
-  font-size: 16px;
-  color: #282c37;
-
-  &:focus {
-    outline: none;
-    border: 1px solid #1bc98e;
-  }
-}
-
-.list {
-  background: #fafbfc;
-}
-
-.recipe-name {
-  position: absolute;
-  top: 8px;
-  left: 71px; // 8px margin + 55px image size + another 8px margin
-  font-weight: 500;
-}
-
-.recipe-item {
-  position: relative;
-  color: #282c37;
-  border-bottom: 1px solid #ebebeb;
-  margin-bottom: 6px;
-
-  .nutrient-item {
-    &.carbs span {
-      color: #eb5350;
-    }
-
-    &.fat span {
-      color: #ec9e31;
-    }
-
-    &.protein span {
-      color: #3b77b1;
-    }
-
-    &.energy span {
-      color: #282c37;
-    }
-  }
-}
-
-.recipeImage {
-  position: relative;
-  display: block;
-  width: 55px;
-  height: 55px;
-  top: 8px;
-  margin-left: 8px;
-  border-radius: 4px;
-}
-
-.nutrients {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-
-  > * {
-    margin: 0 8px;
-  }
-}
-
-.tags {
-  margin-top: 12px;
-  margin-bottom: 12px;
-  margin-left: 71px; // 8px margin + 55px image size + another 8px margin
-  display: flex;
-
-  .tag {
-    display: block;
-    background: #ebeff4;
-    color: #6f7379;
-    padding: 4px 8px;
-    margin-right: 6px;
-    border-radius: 12px;
-    line-height: 1.2;
-    font-weight: 500;
-
-    &.premium {
-      display: flex;
-
-      .trophy {
-        width: 12px;
-        margin-right: 6px;
-      }
-    }
+  &-list {
+    background: #fafbfc;
   }
 }
 </style>

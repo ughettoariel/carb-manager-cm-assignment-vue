@@ -9,6 +9,26 @@
   </div>
 </template>
 
+<script>
+import { mapState, mapActions } from "pinia";
+import { useUserStore } from "@/stores/user";
+export default {
+  name: "App",
+
+  computed: {
+    ...mapState(useUserStore, ["user"]),
+  },
+
+  async created() {
+    await this.fetchUser();
+  },
+
+  methods: {
+    ...mapActions(useUserStore, ["fetchUser"]),
+  },
+};
+</script>
+
 <style lang="scss">
 @import "assets/base.scss";
 
