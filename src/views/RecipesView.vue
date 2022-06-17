@@ -3,11 +3,10 @@
     <div v-if="loading">loading ...</div>
     <div v-else-if="hasError()">Unable to load recipes</div>
     <template v-else>
-      <input
+      <SearchInput
         placeholder="Search foods and servings&hellip;"
-        class="search"
-        type="text"
-        @input="handleFilterRecipes($event.target.value)"
+        :on-search="handleFilterRecipes"
+        case-sensitive
       />
       <div v-if="recipesList.length">
         <div
@@ -27,10 +26,12 @@
 import { mapState, mapActions } from "pinia";
 import { useRecipesStore } from "@/stores/recipes";
 import RecipeCard from "@/components/RecipeCard.vue";
+import SearchInput from "@/components/SearchInput.vue";
 
 export default {
   components: {
     RecipeCard,
+    SearchInput,
   },
 
   data: () => ({
@@ -42,7 +43,6 @@ export default {
   async created() {
     try {
       this.loading = true;
-
       if (!this.recipes.length) await this.fetchRecipes();
       this.recipesList = this.recipes;
     } catch (e) {
@@ -77,23 +77,6 @@ export default {
 .recipes {
   &-list {
     background: #fafbfc;
-  }
-}
-
-.search {
-  border: 1px solid #ebebeb;
-  padding: 16px 12px;
-  border-radius: 30px;
-  display: block;
-  margin-bottom: 12px;
-  width: 100%;
-  transition: all 0.15s ease-out;
-  font-size: 16px;
-  color: #282c37;
-
-  &:focus {
-    outline: none;
-    border: 1px solid #1bc98e;
   }
 }
 </style>

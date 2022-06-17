@@ -9,10 +9,9 @@ export const useRecipesStore = defineStore("recipes", {
 
   getters: {
     getFilteredRecipes: (state) => (filter) => {
-      const filterString = filter?.toLowerCase()?.trim();
-      if (!filterString) return state.recipes;
+      if (!filter) return state.recipes;
       return state.recipes.filter((recipe) =>
-        recipe.name?.toLowerCase()?.includes(filterString)
+        recipe.name?.toLowerCase()?.includes(filter)
       );
     },
   },
