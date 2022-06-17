@@ -12,7 +12,7 @@
 
 <script>
 export default {
-  name: "Tags",
+  name: "TagList",
   props: ["tags", "showPremiumTag"],
 };
 </script>

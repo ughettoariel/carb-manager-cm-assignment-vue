@@ -34,19 +34,22 @@
       </template>
     </div>
 
-    <Tags :show-premium-tag="recipe.isPremium" :tags="recipe.tags" />
+    <TagList :show-premium-tag="recipe.isPremium" :tags="recipe.tags" />
   </div>
 </template>
 
 <script>
+import { mapState } from "pinia";
+import { useUserStore } from "@/stores/user";
 import NutrientItem from "@/components/NutrientItem.vue";
-import Tags from "@/components/Tags.vue";
+import TagList from "@/components/TagList.vue";
+
 export default {
   name: "RecipeCard",
 
   components: {
     NutrientItem,
-    Tags,
+    TagList,
   },
 
   props: ["recipe", "showNutrientName"],
@@ -68,7 +71,7 @@ export default {
     getEnergy(recipeUnit, value) {
       let energy = { label: "", value };
 
-      if (recipeUnit !== this.user.units.energy) {
+      if (recipeUnit !== this.user?.units?.energy) {
         if (recipeUnit === "kilojoule") {
           energy.label = "kCal";
           energy.value = value / 4.184;
