@@ -11,7 +11,7 @@ export const useUserStore = defineStore("user", {
     async fetchUser() {
       try {
         this.user = await getUser();
-      } catch (error) {
+      } catch (e) {
         this.error = true;
       }
     },

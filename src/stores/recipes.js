@@ -15,17 +15,13 @@ export const useRecipesStore = defineStore("recipes", {
         recipe.name?.toLowerCase()?.includes(filterString)
       );
     },
-
-    getRecipeById: (id) => {
-
-    },
   },
 
   actions: {
     async fetchRecipes() {
       try {
         this.recipes = await getRecipes();
-      } catch (error) {
+      } catch (e) {
         this.error = true;
       }
     },
